@@ -1,0 +1,3 @@
+# Need to install...
+
+ > pip install xpinyin
