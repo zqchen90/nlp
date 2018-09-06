@@ -13,6 +13,7 @@ def test():
     ,[u'征', u'证', True], [u'光', u'先', True], [u'贵', u'费', True], [u'辩', u'辨', True]]
   for [char1, char2, simiFlag] in testCases:
     simi = fs.simi(char1, char2)
+    print '%s %s %2.2f' %(char1, char2, simi)
     assert(simiFlag == (simi >= simiThreshold))
 
 if __name__ == '__main__':
