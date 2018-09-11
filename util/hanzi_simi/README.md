@@ -21,7 +21,6 @@ Please run `run_test.py` to evaluate similarity results on these cases. And here
 | overlap+min distance  | 0.65  | 0.829 | 0.906 | 0.866 | 
 | overlap+jaccard+min distance  | 0.60  | 0.819  | 0.925  | 0.869 | 
 
-To get high precision and well f1, recommend settings are:
+To get high precision and well f1, recommended settings are:
  - Font simi type = overlap+jaccard
  - simi threshold = 0.60
- 
