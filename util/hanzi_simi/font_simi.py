@@ -5,6 +5,8 @@
 # Calculate similarity based on character shape
 
 import binascii
+from math import exp
+from rectangle_min_distance import RecMinDistance
 
 RECT_HEIGHT = 16
 RECT_WIDTH = 16
@@ -14,7 +16,7 @@ BYTE_COUNT_PER_FONT = BYTE_COUNT_PER_ROW * RECT_HEIGHT
 KEYS = [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
 
 class FontSimi(object):
-    def __init__(self, font_file,
+    def __init__(self, font_file='./data/hzk16h',
                  rect_height=RECT_HEIGHT, 
                  rect_width=RECT_WIDTH, 
                  byte_count_per_row=BYTE_COUNT_PER_ROW):
@@ -22,15 +24,16 @@ class FontSimi(object):
         self.rect_height = rect_height
         self.rect_width = rect_width
         self.byte_count_per_row = byte_count_per_row
+        self.recMinDistance = RecMinDistance()
 
-    def init_rect_list(self):
+    def initRectList(self):
         rect_list = [] * RECT_HEIGHT
 
         for i in range(RECT_HEIGHT):
             rect_list.append([] * RECT_WIDTH)
         return rect_list
 
-    def get_font_area_index(self, txt, encoding='utf-8'):
+    def getFontAreaIndex(self, txt, encoding='utf-8'):
         if not isinstance(txt, unicode):
             txt = txt.decode(encoding)
 
@@ -42,7 +45,7 @@ class FontSimi(object):
 
         return area, index
 
-    def get_font_rect(self, area, index):
+    def getFontRect(self, area, index):
         offset = (94 * (area-1) + (index-1)) * BYTE_COUNT_PER_FONT
         btxt = None
 
@@ -52,7 +55,7 @@ class FontSimi(object):
 
         return btxt
 
-    def convert_font_rect(self, font_rect, rect_list, ft=1, ff=0):
+    def convertFontRect(self, font_rect, rect_list, ft=1, ff=0):
         for k in range(len(font_rect) / self.byte_count_per_row):
             row_list = rect_list[k]
             for j in range(self.byte_count_per_row):
@@ -63,7 +66,7 @@ class FontSimi(object):
                     row_list.append(flag and ft or ff)
         return rect_list
 
-    def render_font_rect(self, rect_list=None):
+    def renderFontRect(self, rect_list=None):
         if not rect_list:
             rect_list = self.rect_list
 
@@ -76,27 +79,50 @@ class FontSimi(object):
             print ''
         print ''
 
-    def rect_list_simi(self, rect_list1, rect_list2):
-        common_cnt = 0
-        for r in range(RECT_WIDTH):
-            for c in range(RECT_HEIGHT):
-                if rect_list1[r][c] == rect_list2[r][c]:
-                    common_cnt = common_cnt + 1
-        return common_cnt * 1.0 / RECT_HEIGHT / RECT_WIDTH
+    def rectListSimi(self, rect_list1, rect_list2, simi_type):
+      common_cnt = 0
+      common_one_cnt = 0
+      total_one_cnt = 0
+      simi = 0.0
+      
+      for r in range(RECT_WIDTH):
+        for c in range(RECT_HEIGHT):
+          if 1 == rect_list1[r][c] or 1 == rect_list2[r][c]:
+            total_one_cnt = total_one_cnt + 1
+          if 1 == rect_list1[r][c] and 1 == rect_list2[r][c]:
+            common_one_cnt = common_one_cnt + 1
+          if rect_list1[r][c] == rect_list2[r][c]:
+              common_cnt = common_cnt + 1
+
+      if 'jaccard' == simi_type:
+        simi = common_one_cnt * 1.0 / total_one_cnt
+      elif 'mindistance' == simi_type:
+        distance12 = self.recMinDistance.distance(rect_list1, rect_list2, RECT_WIDTH, RECT_HEIGHT)
+        distance21 = self.recMinDistance.distance(rect_list2, rect_list1, RECT_WIDTH, RECT_HEIGHT)
+        simi = exp(-1 * max(distance12, distance21))
+      else:
+        simi = common_cnt * 1.0 / RECT_HEIGHT / RECT_WIDTH
+      return simi
 
     def convert(self, text, ft=None, ff=None, encoding='utf-8'):
         if not isinstance(text, unicode):
             text = text.decode(encoding)
-        area, index = self.get_font_area_index(text)
-        font_rect = self.get_font_rect(area, index)
-        rect_list = self.init_rect_list()
-        rect_list = self.convert_font_rect(font_rect, rect_list, ft=ft, ff=ff)
+        area, index = self.getFontAreaIndex(text)
+        font_rect = self.getFontRect(area, index)
+        rect_list = self.initRectList()
+        rect_list = self.convertFontRect(font_rect, rect_list, ft=ft, ff=ff)
         return rect_list
 
-    def simi(self, char1, char2, renderFlag=False):
+    def simi(self, char1, char2, simi_type = 'default', renderFlag=False):
         rect_list1 = self.convert(char1, ft=1, ff=0)
         rect_list2 = self.convert(char2, ft=1, ff=0)
         if renderFlag:
-            self.render_font_rect(rect_list1)
-            self.render_font_rect(rect_list2)
-        return self.rect_list_simi(rect_list1, rect_list2)
+            self.renderFontRect(rect_list1)
+            self.renderFontRect(rect_list2)
+        return self.rectListSimi(rect_list1, rect_list2, simi_type)
+
+if __name__ == '__main__':
+    fs = FontSimi()
+    print fs.simi(u'入', u'八', 'jaccard', True)
+    print fs.simi(u'入', u'八', 'default', False)
+    print fs.simi(u'入', u'八', 'mindistance', False)

@@ -26,13 +26,14 @@ class PinyinSimi(object):
            leven_cost += (i2-i1)
    return leven_cost
 
+  def pinyinLevenDistance(self, char1, char2):
+    pinyin1 = self.getPinyin(char1)
+    pinyin2 = self.getPinyin(char2)
+    levenDistance = self.getLevenDistance(pinyin1, pinyin2)
+    return levenDistance
+
   def simi(self, char1, char2):
     pinyin1 = self.getPinyin(char1)
     pinyin2 = self.getPinyin(char2)
     levenDistance = self.getLevenDistance(pinyin1, pinyin2)
-    if levenDistance <= 1:
-      return 1.0
-    else:
-      return 0.0 
-
-    # simi = 1 - 1.0 * levenDistance / max(len(pinyin1), len(pinyin2))
+    return 1 - 1.0 * levenDistance / max(len(pinyin1), len(pinyin2))
