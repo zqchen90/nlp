@@ -24,3 +24,4 @@ Please run `run_test.py` to evaluate similarity results on these cases. And here
 To get high precision and well f1, recommend settings are:
  - Font simi type = overlap+jaccard
  - simi threshold = 0.60
+ 

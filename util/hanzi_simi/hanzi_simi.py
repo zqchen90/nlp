@@ -36,3 +36,4 @@ if __name__ == '__main__':
   print hanziSimi.simi(u'洒', u'酒')
   print hanziSimi.simi(u'啦', u'酒')
   print hanziSimi.simi(u'就', u'酒')
+  

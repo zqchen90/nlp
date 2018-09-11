@@ -126,3 +126,4 @@ if __name__ == '__main__':
     print fs.simi(u'入', u'八', 'jaccard', True)
     print fs.simi(u'入', u'八', 'default', False)
     print fs.simi(u'入', u'八', 'mindistance', False)
+    
